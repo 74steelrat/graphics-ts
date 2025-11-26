@@ -1,0 +1,121 @@
+#!/bin/zsh
+
+PROJECT_NAME="graphics-ts"
+ENV="DEV" # DEV or REL
+VERSION_TAG="0.0.0"
+BUILD="0"
+COMMIT_MESSAGE="initial commit"
+COPYRIGHT_YEAR="(c) 2025"
+DATE=$(date "+%Y-%m-%d")
+
+function version_files() {
+  local VERSION=$1
+  shift
+  local FILES=("$@")
+
+  for FILE in ${FILES[@]}; do
+  # Change version
+  sed -i '' -E "s/v[0-9]+\.[0-9]+\.[0-9]+((-[a-zA-Z]*(\.[0-9]+)?)?)(\+build.[0-9]+)?/${VERSION}/" $FILE
+
+  # Change date
+  sed -i '' -E "s/[0-9]{4}-[0-9]{2}-[0-9]{2}/${DATE}/" $FILE
+
+  # Copyright year
+  sed -i '' -E "s/\(c\)[[:space:]]+[0-9]{4}(-[0-9]{4})?/${COPYRIGHT_YEAR}/" $FILE
+  echo $FILE
+  done
+}
+
+function version() {
+  local FILES=("README.md")
+  local VERSION_LONG=$(version_long $VERSION_TAG $BUILD $ENV)
+
+  version_files "v${VERSION_LONG}" "${FILES[@]}"
+
+  echo "Application version updated."
+}
+
+function version_long() {
+  local VERSION_TAG=$1
+  local BUILD=$2
+  local ENV=$3
+  local VERSION_LONG=$VERSION_TAG
+
+  if [[ "$ENV" == "DEV" ]]; then
+    VERSION_LONG="${VERSION_TAG}-dev+build.${BUILD}"
+  elif [[ "$ENV" == "REL" ]]; then
+    VERSION_LONG="${VERSION_TAG}+build.${BUILD}"
+  fi
+
+  echo "$VERSION_LONG"
+}
+
+function commit_messsage() {
+  local VERSION_TAG=$1
+  local BUILD=$2
+  local ENV=$3
+  local COMMIT_MESSAGE=$4
+
+  if [[ "$ENV" == "DEV" ]]; then
+    COMMIT_MESSAGE="${COMMIT_MESSAGE} [#${BUILD}]"
+  elif [[ "$ENV" == "REL" ]]; then
+    COMMIT_MESSAGE="${COMMIT_MESSAGE} [#${BUILD}][v${VERSION_TAG}]"
+  fi
+
+  echo ${COMMIT_MESSAGE}
+}
+
+function release_git_repository() {
+  git checkout main
+  git merge develop -m "Version ${VERSION_TAG} (${DATE})"
+  git tag -a $VERSION_TAG -m "Version ${VERSION_TAG} (${DATE})"
+  git push origin main
+  git push origin $VERSION_TAG
+
+  echo "Remote repository updated."
+}
+
+function commit_git_repository() {
+  local COMMIT_MSG=$(commit_messsage $VERSION_TAG $BUILD $ENV "$COMMIT_MESSAGE")
+
+  version
+  # echo "- [x] ${COMMIT_MSG}" >> TODO.md
+  git add .
+  git commit -m "${COMMIT_MSG}"
+  git push origin develop
+
+  echo "Remote repository updated."
+}
+
+function ide() {
+  tmux new-session -s $PROJECT_NAME -n nvim 'nvim .;zsh -i' \; \
+  new-window -t $PROJECT_NAME:1 -n dev 'zsh -i' \; \
+  new-window -t $PROJECT_NAME:2 -n cli 'zsh -i' \; \
+  select-window -t $PROJECT_NAME:0
+}
+
+#function ide() {
+#  tmux new-session -s $PROJECT_NAME 'nvim .' \; \
+#  rename-window $PROJECT_NAME \; \
+#  split-window -h -p 35 \; \
+#  split-window -v -p 50 \; \
+#  select-pane -L
+#}
+
+case $1 in
+  version)
+    version
+  ;;
+  commit)
+    commit_git_repository
+  ;;
+  release)
+    release_git_repository
+  ;;
+  ide)
+    ide
+  ;;
+  *)
+    echo "Usage: $0 {version|commit|release|ide}"
+  ;;
+esac
