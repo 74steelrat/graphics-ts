@@ -2,4 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased][v0.0.0+build.0] (YYYY-MM-DD)
+## [Unreleased][v0.1.0+build.x] (YYYY-MM-DD)
+
+### Added
+
+- Renderer2D and Renderable types

@@ -2,9 +2,9 @@
 
 PROJECT_NAME="graphics-ts"
 ENV="DEV" # DEV or REL
-VERSION_TAG="0.0.0"
-BUILD="0"
-COMMIT_MESSAGE="initial commit"
+VERSION_TAG="0.1.0"
+BUILD="1"
+COMMIT_MESSAGE="feat: add Renderer2D and Renderable types"
 COPYRIGHT_YEAR="(c) 2025"
 DATE=$(date "+%Y-%m-%d")
 
