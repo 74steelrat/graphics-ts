@@ -10,7 +10,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/index.ts',
-      name: 'math-ts',
+      name: 'graphics-ts',
       fileName: 'index',
       formats: ['es'],
     },

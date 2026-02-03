@@ -1,11 +1,12 @@
 #!/bin/zsh
 
+PROJECT_TITLE="Graphics-TS"
 PROJECT_NAME="graphics-ts"
 ENV="DEV" # DEV or REL
 VERSION_TAG="0.1.0"
-BUILD="1"
-COMMIT_MESSAGE="feat: add Renderer2D and Renderable types"
-COPYRIGHT_YEAR="(c) 2025"
+BUILD="2"
+COMMIT_MESSAGE="feat: add drawing primitives functions"
+COPYRIGHT_YEAR="(c) 2025-2026"
 DATE=$(date "+%Y-%m-%d")
 
 function version_files() {
@@ -87,6 +88,39 @@ function commit_git_repository() {
   echo "Remote repository updated."
 }
 
+function archive() {
+  local VERSION_LONG=$(version_long $VERSION_TAG $BUILD $ENV)
+
+  # Archive name
+  local ARCHIVE_NAME="${PROJECT_TITLE}-v${VERSION_LONG}.zip"
+
+  # Destinations
+  local DEST_DOCUMENTS="$HOME/Documents/Projects/${PROJECT_TITLE}"
+  local DEST_ICLOUD="$HOME/iCloudDrive/Projects"
+
+  # Ensure destination directories exist
+  mkdir -p "$DEST_DOCUMENTS"
+  mkdir -p "$DEST_ICLOUD"
+
+  echo "Creating archive: $ARCHIVE_NAME"
+
+  # Create zip, excluding node_modules, dist
+  zip -r "/tmp/$ARCHIVE_NAME" . \
+    -x "node_modules/*" \
+    -x "**/node_modules/*" \
+    -x "dist/*" \
+
+  # Copy archive to destinations
+  cp "/tmp/$ARCHIVE_NAME" "$DEST_DOCUMENTS/"
+  cp "/tmp/$ARCHIVE_NAME" "$DEST_ICLOUD/"
+
+  rm "/tmp/$ARCHIVE_NAME"
+
+  echo "Archive created and copied to:"
+  echo " - $DEST_DOCUMENTS"
+  echo " - $DEST_ICLOUD"
+}
+
 function ide() {
   tmux new-session -s $PROJECT_NAME -n nvim 'nvim .;zsh -i' \; \
   new-window -t $PROJECT_NAME:1 -n dev 'zsh -i' \; \
@@ -115,7 +149,10 @@ case $1 in
   ide)
     ide
   ;;
+  archive)
+    archive
+  ;;
   *)
-    echo "Usage: $0 {version|commit|release|ide}"
+    echo "Usage: $0 {version|commit|release|ide|archive}"
   ;;
 esac

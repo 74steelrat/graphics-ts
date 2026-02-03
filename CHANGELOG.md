@@ -7,3 +7,4 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Renderer2D and Renderable types
+- Drawing primitives
