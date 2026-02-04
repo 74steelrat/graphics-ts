@@ -4,8 +4,8 @@ PROJECT_TITLE="Graphics-TS"
 PROJECT_NAME="graphics-ts"
 ENV="DEV" # DEV or REL
 VERSION_TAG="0.1.0"
-BUILD="4"
-COMMIT_MESSAGE="fix: export Viewport module"
+BUILD="5"
+COMMIT_MESSAGE="fix: export naming for Viewport module"
 COPYRIGHT_YEAR="(c) 2025-2026"
 DATE=$(date "+%Y-%m-%d")
 
