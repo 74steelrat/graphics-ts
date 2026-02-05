@@ -43,7 +43,7 @@ export const drawLine = (
 export const drawPolygon = (
   ctx: CanvasRenderingContext2D,
   points: readonly Point2.T[],
-  { fill, stroke, lineWidth = 1 }: DrawStyle = {}
+  { fill, stroke, lineWidth = 1, lineJoin = 'miter' }: DrawStyle = {}
 ): void => {
   if (points.length === 0) return;
 
@@ -64,6 +64,7 @@ export const drawPolygon = (
   if (stroke) {
     ctx.strokeStyle = stroke;
     ctx.lineWidth = lineWidth;
+    ctx.lineJoin = lineJoin;
     ctx.stroke();
   }
 };
