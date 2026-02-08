@@ -26,11 +26,17 @@ export const drawLine = (
   ctx: CanvasRenderingContext2D,
   from: Point2.T,
   to: Point2.T,
-  { stroke = 'black', lineWidth = 1, dash = [] }: DrawStyle = {}
+  {
+    stroke = 'black',
+    lineWidth = 1,
+    dash = [],
+    lineCap = 'butt',
+  }: DrawStyle = {}
 ): void => {
   ctx.beginPath();
   ctx.strokeStyle = stroke;
   ctx.lineWidth = lineWidth;
+  ctx.lineCap = lineCap;
   ctx.setLineDash(dash);
 
   ctx.moveTo(from.x, from.y);
