@@ -4,8 +4,8 @@ PROJECT_TITLE="Graphics-TS"
 PROJECT_NAME="graphics-ts"
 ENV="DEV" # DEV or REL
 VERSION_TAG="0.1.0"
-BUILD="7"
-COMMIT_MESSAGE="feat: add lineCap parameter to StrokeStyle"
+BUILD="8"
+COMMIT_MESSAGE="feat: add CanvasInteractable interface"
 COPYRIGHT_YEAR="(c) 2025-2026"
 DATE=$(date "+%Y-%m-%d")
 
