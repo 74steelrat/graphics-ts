@@ -5,3 +5,4 @@ export * from './Primitives';
 export * from './Color';
 export * from './Types';
 export * as Viewport from './Viewport';
+export * as Scene from './Scene';
