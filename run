@@ -4,8 +4,8 @@ PROJECT_TITLE="Graphics-TS"
 PROJECT_NAME="graphics-ts"
 ENV="DEV" # DEV or REL
 VERSION_TAG="0.1.0"
-BUILD="8"
-COMMIT_MESSAGE="feat: add CanvasInteractable interface"
+BUILD="9"
+COMMIT_MESSAGE="feat: add Scene, SceneNode modules"
 COPYRIGHT_YEAR="(c) 2025-2026"
 DATE=$(date "+%Y-%m-%d")
 
@@ -83,7 +83,7 @@ function commit_git_repository() {
   # echo "- [x] ${COMMIT_MSG}" >> TODO.md
   git add .
   git commit -m "${COMMIT_MSG}"
-  git push origin develop
+  git push origin develop-scene
 
   echo "Remote repository updated."
 }

@@ -1,3 +1,143 @@
+import * as Scene from './Scene';
+
+export type Shared = {
+  start(): void;
+  stop(): void;
+};
+
+export type T = {
+  readonly label?: string;
+  readonly canvas: HTMLCanvasElement;
+  readonly context: CanvasRenderingContext2D;
+
+  setScene(scene: Scene.T): void;
+  start(): void;
+  stop(): void;
+  tick(deltaTime: number): void;
+  clear(): void;
+  render(): void;
+  dispose(): void;
+};
+
+export const create = (
+  id: string,
+  label?: string,
+  width?: number,
+  height?: number
+): T | null => {
+  const canvas = document.getElementById(id) as HTMLCanvasElement | null;
+  if (!canvas) return null;
+
+  canvas.width = width || window.innerWidth;
+  canvas.height = height || window.innerHeight;
+
+  const context = canvas.getContext('2d');
+  if (!context) return null;
+
+  let animationFrame: number | null = null;
+  let lastTime = 0;
+  let scene: Scene.T | null = null;
+
+  const setScene = (s: Scene.T) => {
+    if (scene) scene.detach();
+    scene = s;
+    scene.attach(renderer);
+  };
+
+  const clear = () => {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const start = () => {
+    if (!scene || animationFrame) return;
+
+    const loop = (time: number) => {
+      const deltaTime = time - lastTime;
+      lastTime = time;
+
+      clear();
+
+      scene!.update(deltaTime);
+      scene!.render(renderer);
+
+      animationFrame = requestAnimationFrame(loop);
+    };
+
+    animationFrame = requestAnimationFrame(loop);
+  };
+
+  const stop = () => {
+    if (animationFrame !== null) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+    }
+  };
+
+  const tick = (deltaTime: number) => {
+    if (!scene) return;
+    clear();
+    scene.update(deltaTime);
+    scene.render(renderer);
+  };
+
+  const render = () => {
+    if (scene) scene.render(renderer);
+  };
+
+  const dispose = () => {
+    stop();
+    scene?.detach();
+  };
+
+  const renderer: T = {
+    label,
+    canvas,
+    context,
+    setScene,
+    start,
+    stop,
+    tick,
+    clear,
+    render,
+    dispose,
+  };
+
+  return renderer;
+};
+
+export const createSharedLoop = (renderers: T[]): Shared => {
+  let animationFrame: number | null = null;
+  let lastTime = 0;
+  let running = false;
+
+  const loop = (time: number) => {
+    if (!running) return;
+    const delta = time - lastTime;
+    lastTime = time;
+    renderers.forEach((r) => r.tick(delta));
+    animationFrame = requestAnimationFrame(loop);
+  };
+
+  const start = () => {
+    if (!running) {
+      running = true;
+      animationFrame = requestAnimationFrame(loop);
+    }
+  };
+
+  const stop = () => {
+    running = false;
+
+    if (animationFrame !== null) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = null;
+    }
+  };
+
+  return { start, stop };
+};
+
+/*
 import type { Renderable } from './Renderable';
 
 export type T = {
@@ -99,3 +239,4 @@ export const startShared = (
     }
   };
 };
+*/
