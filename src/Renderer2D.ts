@@ -1,24 +1,54 @@
 import * as Scene from './Scene';
 
+/**
+ * Lifecycle controller for shared animation loop.
+ */
 export type Shared = {
+  /** Starts the loop. */
   start(): void;
+
+  /** Stops the loop. */
   stop(): void;
 };
 
+/**
+ * Renderer interface responsible for scene management and render loop control.
+ */
 export type T = {
+  /** Optional renderer label (useful for debugging). */
   readonly label?: string;
+
+  /** Target canvas element. */
   readonly canvas: HTMLCanvasElement;
+
+  /** 2D drawing context. */
   readonly context: CanvasRenderingContext2D;
 
+  /** Assigns a scene to the renderer. */
   setScene(scene: Scene.T): void;
+
+  /** Starts the internal render loop. */
   start(): void;
+
+  /** Stops the internal render loop. */
   stop(): void;
+
+  /** Executes a single update + render cycle manually. */
   tick(deltaTime: number): void;
+
+  /** Clears the canvas. */
   clear(): void;
+
+  /** Renders the current scene. */
   render(): void;
+
+  /** Cleans up resources. */
   dispose(): void;
 };
 
+/**
+ * Creates a new Renderer2D instance bound to a canvas element.
+ */
 export const create = (
   id: string,
   label?: string,
@@ -27,6 +57,12 @@ export const create = (
 ): T | null => {
   const canvas = document.getElementById(id) as HTMLCanvasElement | null;
   if (!canvas) return null;
+
+  /* Alternative implementation: throw instead return `null`.
+  if (!canvas) {
+    throw new Error(`Canvas with id "${id}" not found`);
+  }
+  */
 
   canvas.width = width || window.innerWidth;
   canvas.height = height || window.innerHeight;
@@ -38,27 +74,32 @@ export const create = (
   let lastTime = 0;
   let scene: Scene.T | null = null;
 
+  /** Sets the active scene and detaches previous scene if present. */
   const setScene = (s: Scene.T) => {
     if (scene) scene.detach();
     scene = s;
     scene.attach(renderer);
   };
 
+  /** Clears entire canvas. */
   const clear = () => {
     context.clearRect(0, 0, canvas.width, canvas.height);
   };
 
+  /** Starts requestAnimationFrame loop. */
   const start = () => {
     if (!scene || animationFrame) return;
 
     const loop = (time: number) => {
+      if (!lastTime) lastTime = time;
       const deltaTime = time - lastTime;
       lastTime = time;
 
       clear();
 
-      scene!.update(deltaTime);
-      scene!.render(renderer);
+      if (!scene) return;
+      scene.update(deltaTime);
+      scene.render(renderer);
 
       animationFrame = requestAnimationFrame(loop);
     };
@@ -66,6 +107,7 @@ export const create = (
     animationFrame = requestAnimationFrame(loop);
   };
 
+  /** Stops the render loop. */
   const stop = () => {
     if (animationFrame !== null) {
       cancelAnimationFrame(animationFrame);
@@ -73,6 +115,7 @@ export const create = (
     }
   };
 
+  /** Executes a single frame manually. */
   const tick = (deltaTime: number) => {
     if (!scene) return;
     clear();
@@ -80,10 +123,12 @@ export const create = (
     scene.render(renderer);
   };
 
+  /** Renders scene without updating. */
   const render = () => {
     if (scene) scene.render(renderer);
   };
 
+  /** Stops loop and detaches scene. */
   const dispose = () => {
     stop();
     scene?.detach();
@@ -105,6 +150,10 @@ export const create = (
   return renderer;
 };
 
+/**
+ * Creates a shared animation loop for multiple renderers.
+ * Useful for synchronizing multiple canvases.
+ */
 export const createSharedLoop = (renderers: T[]): Shared => {
   let animationFrame: number | null = null;
   let lastTime = 0;
@@ -112,12 +161,15 @@ export const createSharedLoop = (renderers: T[]): Shared => {
 
   const loop = (time: number) => {
     if (!running) return;
+
+    if (!lastTime) lastTime = time;
     const delta = time - lastTime;
     lastTime = time;
     renderers.forEach((r) => r.tick(delta));
     animationFrame = requestAnimationFrame(loop);
   };
 
+  /** Starts requestAnimationFrame loop. */
   const start = () => {
     if (!running) {
       running = true;
@@ -125,6 +177,7 @@ export const createSharedLoop = (renderers: T[]): Shared => {
     }
   };
 
+  /** Stops the render loop. */
   const stop = () => {
     running = false;
 
@@ -136,107 +189,3 @@ export const createSharedLoop = (renderers: T[]): Shared => {
 
   return { start, stop };
 };
-
-/*
-import type { Renderable } from './Renderable';
-
-export type T = {
-  label?: string;
-  canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
-
-  // Private
-  _animationFrameId: number | null;
-  _isAnimating: boolean;
-};
-
-export const create = (
-  id: string,
-  label?: string,
-  width?: number,
-  height?: number
-): T | null => {
-  const canvas = document.getElementById(id) as HTMLCanvasElement | null;
-  if (!canvas) return null;
-
-  const context = canvas.getContext('2d');
-  if (!context) return null;
-
-  canvas.width = width || window.innerWidth;
-  canvas.height = height || window.innerHeight;
-
-  return {
-    label,
-    canvas,
-    context,
-    _animationFrameId: null,
-    _isAnimating: false,
-  };
-};
-
-export const draw = (renderer: T, renderable: Renderable): void => {
-  renderable.init(renderer);
-  renderable.draw(renderer);
-};
-
-export const start = (renderer: T, renderable: Renderable): void => {
-  if (renderer._isAnimating) return;
-
-  renderer._isAnimating = true;
-  renderable.init(renderer);
-
-  const animate = () => {
-    if (!renderer._isAnimating) return;
-
-    renderable.draw(renderer);
-    renderable.update(renderer);
-    renderer._animationFrameId = window.requestAnimationFrame(animate);
-  };
-
-  renderer._animationFrameId = window.requestAnimationFrame(animate);
-};
-
-export const stop = (renderer: T): void => {
-  renderer._isAnimating = false;
-
-  if (renderer._animationFrameId !== null) {
-    window.cancelAnimationFrame(renderer._animationFrameId);
-    renderer._animationFrameId = null;
-  }
-};
-
-export const destroy = (renderer: T, renderable: Renderable): void => {
-  stop(renderer);
-  renderable.destroy();
-};
-
-export const startShared = (
-  pairs: { renderer: T; renderable: Renderable }[]
-): (() => void) => {
-  pairs.forEach(({ renderer, renderable }) => renderable.init(renderer));
-
-  let isAnimating = true;
-  let animationFrameId: number | null = null;
-
-  const animate = (time: number) => {
-    if (!isAnimating) return;
-
-    pairs.forEach(({ renderer, renderable }) => {
-      renderable.draw(renderer, time);
-      renderable.update(renderer, time);
-    });
-
-    animationFrameId = window.requestAnimationFrame(animate);
-  };
-
-  animationFrameId = window.requestAnimationFrame(animate);
-
-  return () => {
-    isAnimating = false;
-    if (animationFrameId !== null) {
-      window.cancelAnimationFrame(animationFrameId);
-      animationFrameId = null;
-    }
-  };
-};
-*/

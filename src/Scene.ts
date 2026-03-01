@@ -1,9 +1,34 @@
-import type { SceneNode } from './Types';
+import type { Enableable } from './Types';
 import * as Renderer2D from './Renderer2D';
 
+/**
+ * Renderable and updatable unit inside a Scene.
+ */
+export interface Node {
+  /** Called when node is attached to a renderer. */
+  onAttach(renderer: Renderer2D.T): void;
+
+  /** Called when node is detached. */
+  onDetach(): void;
+
+  /** Called every frame before rendering. */
+  onUpdate(deltaTime: number): void;
+
+  /** Called every frame during render phase. */
+  onRender(renderer: Renderer2D.T): void;
+}
+
+/**
+ * Node with enable/disable capability.
+ */
+export type InteractiveNode = Node & Enableable;
+
+/**
+ * Scene manages lifecycle of nodes.
+ */
 export type T = {
-  add(node: SceneNode): void;
-  remove(node: SceneNode): void;
+  add(node: Node): void;
+  remove(node: Node): void;
 
   attach(renderer: Renderer2D.T): void;
   detach(): void;
@@ -12,16 +37,19 @@ export type T = {
   render(renderer: Renderer2D.T): void;
 };
 
+/**
+ * Creates a new Scene instance.
+ */
 export const create = (): T => {
-  let nodes: SceneNode[] = [];
+  let nodes: Node[] = [];
   let renderer: Renderer2D.T | null = null;
 
-  const add = (node: SceneNode) => {
+  const add = (node: Node) => {
     nodes.push(node);
     if (renderer) node.onAttach(renderer);
   };
 
-  const remove = (node: SceneNode) => {
+  const remove = (node: Node) => {
     nodes = nodes.filter((n) => n !== node);
     node.onDetach();
   };
