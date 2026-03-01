@@ -5,7 +5,7 @@ export const drawCircle = (
   ctx: CanvasRenderingContext2D,
   point: Point2.T,
   radius: number,
-  { fill, stroke, lineWidth = 1 }: DrawStyle = {}
+  { fill, stroke, lineWidth = 1, dash = [] }: DrawStyle = {}
 ): void => {
   ctx.beginPath();
   ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
@@ -18,7 +18,9 @@ export const drawCircle = (
   if (stroke) {
     ctx.strokeStyle = stroke;
     ctx.lineWidth = lineWidth;
+    ctx.setLineDash(dash);
     ctx.stroke();
+    ctx.setLineDash([]);
   }
 };
 
@@ -49,7 +51,7 @@ export const drawLine = (
 export const drawPolygon = (
   ctx: CanvasRenderingContext2D,
   points: readonly Point2.T[],
-  { fill, stroke, lineWidth = 1, lineJoin = 'miter' }: DrawStyle = {}
+  { fill, stroke, lineWidth = 1, dash = [], lineJoin = 'miter' }: DrawStyle = {}
 ): void => {
   if (points.length === 0) return;
 
@@ -70,8 +72,10 @@ export const drawPolygon = (
   if (stroke) {
     ctx.strokeStyle = stroke;
     ctx.lineWidth = lineWidth;
+    ctx.setLineDash(dash);
     ctx.lineJoin = lineJoin;
     ctx.stroke();
+    ctx.setLineDash([]);
   }
 };
 
