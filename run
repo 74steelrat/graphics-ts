@@ -4,8 +4,8 @@ PROJECT_TITLE="Graphics-TS"
 PROJECT_NAME="graphics-ts"
 ENV="DEV" # DEV or REL
 VERSION_TAG="0.1.0"
-BUILD="11"
-COMMIT_MESSAGE="chore: refactor Scene and Renderer2D modules"
+BUILD="12"
+COMMIT_MESSAGE="feat: add setupHiDPICanvas function to Renderer2D module"
 COPYRIGHT_YEAR="(c) 2025-2026"
 DATE=$(date "+%Y-%m-%d")
 

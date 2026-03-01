@@ -24,6 +24,18 @@ export type T = {
   /** 2D drawing context. */
   readonly context: CanvasRenderingContext2D;
 
+  /**
+   * Logical canvas width in CSS pixels (pre-HiDPI scaling).
+   * All drawing code should use this for calculations.
+   */
+  readonly width: number;
+
+  /**
+   * Logical canvas height in CSS pixels (pre-HiDPI scaling).
+   * All drawing code should use this for calculations.
+   */
+  readonly height: number;
+
   /** Assigns a scene to the renderer. */
   setScene(scene: Scene.T): void;
 
@@ -64,8 +76,11 @@ export const create = (
   }
   */
 
-  canvas.width = width || window.innerWidth;
-  canvas.height = height || window.innerHeight;
+  const logicalWidth = width || window.innerWidth;
+  const logicalHeight = height || window.innerHeight;
+
+  canvas.width = logicalWidth;
+  canvas.height = logicalHeight;
 
   const context = canvas.getContext('2d');
   if (!context) return null;
@@ -138,6 +153,8 @@ export const create = (
     label,
     canvas,
     context,
+    width: logicalWidth,
+    height: logicalHeight,
     setScene,
     start,
     stop,
@@ -146,6 +163,31 @@ export const create = (
     render,
     dispose,
   };
+
+  return renderer;
+};
+
+/**
+ * Optional setup for High-DPI / Retina displays.
+ * Scales canvas and context according to devicePixelRatio.
+ * After this, canvas.width / canvas.height are physical pixels,
+ * but drawing can still use logical `width` / `height`.
+ */
+export const setupHiDPICanvas = (renderer: T | null): T | null => {
+  if (!renderer) return null;
+
+  const dpr = window.devicePixelRatio || 1;
+
+  // Keep CSS size equal to logical dimensions
+  renderer.canvas.style.width = `${renderer.width}px`;
+  renderer.canvas.style.height = `${renderer.height}px`;
+
+  // Scale physical canvas resolution
+  renderer.canvas.width = renderer.width * dpr;
+  renderer.canvas.height = renderer.height * dpr;
+
+  // Scale context so 1 logical unit = 1 CSS pixel
+  renderer.context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   return renderer;
 };
