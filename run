@@ -2,10 +2,10 @@
 
 PROJECT_TITLE="Graphics-TS"
 PROJECT_NAME="graphics-ts"
-ENV="REL" # DEV or REL
-VERSION_TAG="0.1.0"
-BUILD="13"
-COMMIT_MESSAGE="feat: add dash option to drawCircle and drawPolygon functions"
+ENV="DEV" # DEV or REL
+VERSION_TAG="0.1.1"
+BUILD="14"
+COMMIT_MESSAGE="feat: add isInteractiveNode type guard function to Scene module"
 COPYRIGHT_YEAR="(c) 2025-2026"
 DATE=$(date "+%Y-%m-%d")
 

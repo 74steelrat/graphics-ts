@@ -35,6 +35,9 @@ export type T = {
 
   update(deltaTime: number): void;
   render(renderer: Renderer2D.T): void;
+
+  enable(): void;
+  disable(): void;
 };
 
 /**
@@ -72,5 +75,39 @@ export const create = (): T => {
     nodes.forEach((n) => n.onRender(r));
   };
 
-  return { add, remove, attach, detach, update, render };
+  /**
+   * Enable all interactive nodes.
+   */
+  const enable = () => {
+    nodes.forEach((node) => {
+      if (isInteractiveNode(node)) {
+        node.enable();
+      }
+    });
+  };
+
+  /**
+   * Disable all interactive nodes.
+   */
+  const disable = () => {
+    nodes.forEach((node) => {
+      if (isInteractiveNode(node)) {
+        node.disable();
+      }
+    });
+  };
+
+  return { add, remove, attach, detach, update, render, enable, disable };
+};
+
+/**
+ * Runtime type guard that checks if a Node is Interactive.
+ */
+export const isInteractiveNode = (
+  node: Node | InteractiveNode
+): node is InteractiveNode => {
+  return (
+    typeof (node as InteractiveNode).enable === 'function' &&
+    typeof (node as InteractiveNode).disable === 'function'
+  );
 };
