@@ -81,7 +81,7 @@ export const create = (): T => {
   const enable = () => {
     nodes.forEach((node) => {
       if (isInteractiveNode(node)) {
-        node.enable();
+        node.onEnable();
       }
     });
   };
@@ -92,7 +92,7 @@ export const create = (): T => {
   const disable = () => {
     nodes.forEach((node) => {
       if (isInteractiveNode(node)) {
-        node.disable();
+        node.onDisable();
       }
     });
   };
@@ -107,7 +107,7 @@ export const isInteractiveNode = (
   node: Node | InteractiveNode
 ): node is InteractiveNode => {
   return (
-    typeof (node as InteractiveNode).enable === 'function' &&
-    typeof (node as InteractiveNode).disable === 'function'
+    typeof (node as InteractiveNode).onEnable === 'function' &&
+    typeof (node as InteractiveNode).onDisable === 'function'
   );
 };

@@ -1,6 +1,6 @@
 export interface Enableable {
-  enable(): void;
-  disable(): void;
+  onEnable(): void;
+  onDisable(): void;
 }
 
 export interface StrokeStyle {
